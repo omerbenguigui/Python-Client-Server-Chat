@@ -2,7 +2,30 @@
 
 A terminal chat application built with Python sockets and threads for a networking study project. One server handles multiple clients, with group messages, direct messages and an online-user list.
 
-The repository also contains a packet capture, traffic-analysis workbooks, screenshots and a project report.
+Browse the [project report](docs/tcp-chat-project-report.md), [network analysis](docs/network/README.md) and screenshots below directly on GitHub. Original Word, Excel and packet-capture files are also available.
+
+## Screenshots
+
+### Group chat
+
+Multiple connected clients exchange messages through the server.
+
+![Group chat session](docs/images/group-chat-session.png)
+
+<details>
+<summary>Client disconnection and TCP stream inspection</summary>
+
+The client receives departure notifications and an updated online-user list.
+
+![Client disconnection and online-user updates](docs/images/client-disconnection.png)
+
+Wireshark's Follow TCP Stream view shows the plaintext application protocol.
+
+![Wireshark TCP stream showing login and group messages](docs/images/wireshark-tcp-stream.png)
+
+</details>
+
+These screenshots document the original coursework session. The client filename visible in the terminal differs from the current repository's `client.py`.
 
 ## How it works
 
@@ -60,12 +83,15 @@ The server protocol accepts `LOGIN <name>`, `LIST`, `ALL <message>`, `DM <name> 
 | --- | --- |
 | [server.py](server.py) | Connection handling, user registry and message routing |
 | [client.py](client.py) | Terminal input and background receive loop |
-| [Packet capture](ServerCapture%20%281%29.pcapng) | Capture included with the networking project |
-| [Traffic analysis workbook](traffic_analysis.csv.xlsx) | Analysis workbook in Excel format |
-| [Traffic data workbook](traffic_data.xlsx) | Supporting traffic data |
-| [Project report](דוח%20פרויקט%20שקד%20ועומר.docx) | Hebrew report accompanying the project |
+| [Project report](docs/tcp-chat-project-report.md) | Read the original Hebrew report in the browser |
+| [Network analysis](docs/network/README.md) | Worksheet previews and CSV tables that open on GitHub |
+| [Screenshots](docs/images/) | Group chat, disconnection and Wireshark TCP stream |
+| [Word report](docs/tcp-chat-project-report.docx) | Original report for download |
+| [Packet capture](docs/network/server-traffic-capture.pcapng) | Original capture for Wireshark |
+| [Traffic analysis workbook](docs/network/traffic-analysis.xlsx) | Original Excel workbook with HTTP message examples |
+| [Traffic data workbook](docs/network/traffic-data.xlsx) | Original Excel workbook with TCP packet data |
 
-The PNG files in the repository show the original project sessions. The capture can be opened in Wireshark; the workbooks and report are supporting materials, not application dependencies.
+The report and worksheet previews need no download. Word and Excel files preserve the original documents; the packet capture requires a tool such as Wireshark. These materials are not application dependencies.
 
 ## Scope and next steps
 

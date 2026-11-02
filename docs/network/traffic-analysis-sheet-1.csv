@@ -1,0 +1,11 @@
+msg_id,app_protocol,src_app,dst_app,message,timestamp
+1,HTTP,client_browser,web_server,GET /index.html,1.4999999999999999E-2
+2,HTTP,web_server,client_browser,HTTP/1.1 200 OK,0.02
+3,HTTP,client_browser,web_server,User-Agent: Mozilla/5.0,3.5000000000000003E-2
+4,HTTP,web_server,client_browser,Content-Type: text/html,0.04
+5,HTTP,client_browser,web_server,Accept-Language: en-US,5.5E-2
+6,HTTP,web_server,client_browser,Server: Apache/2.4.41,0.06
+7,HTTP,client_browser,web_server,Connection: keep-alive,7.4999999999999997E-2
+8,HTTP,web_server,client_browser,Date: Mon, 21 Oct 2024
+9,HTTP,client_browser,web_server,Host: google.com,9.5000000000000001E-2
+10,HTTP,web_server,client_browser,Cache-Control: private,0.1

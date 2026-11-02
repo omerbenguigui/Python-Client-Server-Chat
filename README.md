@@ -1,4 +1,4 @@
-# Python TCP Chat
+# Python Client-Server Chat
 
 A terminal chat application built with Python sockets and threads for a networking study project. One server handles multiple clients, with group messages, direct messages and an online-user list.
 
@@ -43,12 +43,7 @@ The server creates a thread for each connection. A lock protects the username-to
 
 Requires **Python 3.10 or newer**. Both programs use only the standard library, so no pip packages are needed.
 
-For a demo on one computer, set these constants before running:
-
-- In `client.py`: `SERVER_IP = "127.0.0.1"`
-- In `server.py`: `HOST = "127.0.0.1"`
-
-The checked-in client address is from the original local network. Both programs use port `50000`; the server's checked-in `0.0.0.0` address listens on all network interfaces.
+Both programs default to `127.0.0.1:50000`, so the demo runs on one computer without editing the source code.
 
 Start the server:
 
@@ -62,7 +57,9 @@ Open two more terminals and run this in each:
 python client.py
 ```
 
-Choose a different username for each client. For the existing client's direct-message behavior, use uppercase names such as `ALICE` and `BOB`.
+Choose a different username for each client, such as `Alice` and `Bob`. Usernames are case-sensitive; commands preserve the recipient's name and message text.
+
+To choose another port, use `python server.py --port 50500` and `python client.py --port 50500`. For a trusted local-network demo, bind the server to its LAN address with `--host` and pass that same address to each client. Use `--help` to see the available options. The application does not encrypt traffic.
 
 ## Client commands
 
@@ -70,12 +67,22 @@ Choose a different username for each client. For the existing client's direct-me
 | --- | --- |
 | `Hello everyone` | Sends a group message, preserving its case |
 | `/list` | Lists connected users |
-| `/dm BOB Hello` | Sends a direct message to BOB |
+| `/dm Bob Hello` | Sends a direct message to Bob without changing the message case |
 | `/quit` | Closes the client |
 
 The server protocol accepts `LOGIN <name>`, `LIST`, `ALL <message>`, `DM <name> <message>` and `QUIT`. Responses use `SYS`, `OK`, `ERR` and `MSG` prefixes.
 
-**Client limitation:** slash commands currently uppercase the entire line, including the direct-message recipient and message body. Usernames are case-sensitive on the server. Ordinary messages avoid this conversion.
+Only the command word is case-insensitive. Both receive loops buffer bytes until a complete line arrives, preserving UTF-8 text even when a character is split between socket reads. If the server disconnects while the terminal is waiting for input, press Enter to exit.
+
+## Tests
+
+Run the standard-library test suite with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Tests cover login, duplicate usernames, group and direct messages, username validation, clean and abrupt disconnections, reconnection, and fragmented UTF-8 messages. GitHub Actions runs the suite on Windows and Linux with Python 3.10 and 3.13.
 
 ## Repository contents
 
@@ -95,8 +102,8 @@ The report and worksheet previews need no download. Word and Excel files preserv
 
 ## Scope and next steps
 
-This is a local networking exercise. It has no encryption, password authentication, persistent message history or automated test suite. A username identifies a connection; it does not verify a person's identity.
+This is a local networking exercise. It has no encryption, password authentication or persistent message history. A username identifies a connection; it does not verify a person's identity.
 
-The next improvements would be to preserve command arguments, make host and port configurable at launch, add protocol tests, and report connection errors instead of suppressing them.
+Possible next steps include TLS, authenticated accounts, message-size limits and per-client send queues for slow connections.
 
 [More projects](https://github.com/omerbenguigui)

@@ -1,8 +1,13 @@
+"""Threaded TCP chat server for local and explicitly configured LAN demos."""
+
+import argparse
+import logging
 import socket
 import threading
 
-HOST = "0.0.0.0"
+HOST = "127.0.0.1"
 PORT = 50000
+logger = logging.getLogger(__name__)
 
 # Active clients: username -> socket
 clients = {}
@@ -14,7 +19,7 @@ def safe_send(sock: socket.socket, text: str) -> bool:
     try:
         sock.sendall(text.encode("utf-8"))
         return True
-    except:
+    except OSError:
         return False
 
 
@@ -36,15 +41,15 @@ def broadcast(text: str, exclude: str | None = None) -> None:
         if exclude is not None and name == exclude:
             continue
         if not safe_send(sock, text):
-            dead.append(name)
+            dead.append((name, sock))
 
     if dead:
         with clients_lock:
-            for name in dead:
-                if name in clients:
+            for name, failed_socket in dead:
+                if clients.get(name) is failed_socket:
                     try:
                         clients[name].close()
-                    except:
+                    except OSError:
                         pass
                     del clients[name]
 
@@ -55,16 +60,15 @@ def build_user_list() -> str:
     return ", ".join(names) if names else "None"
 
 
-def cleanup_user(username: str) -> None:
+def cleanup_user(username: str, conn: socket.socket) -> None:
     with clients_lock:
-        sock = clients.pop(username, None)
-    if sock:
-        try:
-            sock.close()
-        except:
-            pass
-    broadcast(f"SYS USER_LEFT {username}\n")
-    broadcast(f"SYS ONLINE {build_user_list()}\n")
+        registered = clients.get(username) is conn
+        if registered:
+            del clients[username]
+    conn.close()
+    if registered:
+        broadcast(f"SYS USER_LEFT {username}\n")
+        broadcast(f"SYS ONLINE {build_user_list()}\n")
 
 
 def handle_client(conn: socket.socket, addr):
@@ -73,19 +77,24 @@ def handle_client(conn: socket.socket, addr):
         conn.settimeout(60)
 
         safe_send(conn, "SYS WELCOME\n")
-        safe_send(conn, "SYS PROTOCOL Commands: LOGIN <name> | LIST | ALL <msg> | DM <name> <msg> | QUIT\n")
-        safe_send(conn, "SYS TIP In client you can type: /all hi, /dm shaked hi, /list, /quit\n")
+        safe_send(
+            conn,
+            "SYS PROTOCOL Commands: LOGIN <name> | LIST | ALL <msg> | DM <name> <msg> | QUIT\n",
+        )
+        safe_send(
+            conn, "SYS TIP In client you can type: /all hi, /dm Bob hi, /list, /quit\n"
+        )
 
-        buffer = ""
+        buffer = b""
         while True:
             chunk = conn.recv(4096)
             if not chunk:
                 break
-            buffer += chunk.decode("utf-8", errors="replace")
+            buffer += chunk
 
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
+            while b"\n" in buffer:
+                raw_line, buffer = buffer.split(b"\n", 1)
+                line = raw_line.decode("utf-8", errors="replace").strip()
                 if not line:
                     continue
 
@@ -96,13 +105,19 @@ def handle_client(conn: socket.socket, addr):
                     if username is not None:
                         safe_send(conn, "ERR Already logged in\n")
                         continue
-                    if len(parts) < 2:
+                    if len(parts) != 2:
                         safe_send(conn, "ERR Usage: LOGIN <name>\n")
                         continue
 
                     requested = parts[1].strip()
-                    if not requested or len(requested) > 20 or " " in requested:
-                        safe_send(conn, "ERR Invalid username (1-20 chars, no spaces)\n")
+                    if (
+                        not requested
+                        or len(requested) > 20
+                        or any(c.isspace() for c in requested)
+                    ):
+                        safe_send(
+                            conn, "ERR Invalid username (1-20 chars, no spaces)\n"
+                        )
                         continue
 
                     with clients_lock:
@@ -130,7 +145,7 @@ def handle_client(conn: socket.socket, addr):
                     if len(parts) < 2:
                         safe_send(conn, "ERR Usage: ALL <message>\n")
                         continue
-                    msg = line[len("ALL "):].strip()
+                    msg = line[len("ALL ") :].strip()
                     if not msg:
                         safe_send(conn, "ERR Empty message\n")
                         continue
@@ -158,37 +173,53 @@ def handle_client(conn: socket.socket, addr):
 
                 elif cmd == "QUIT":
                     safe_send(conn, "SYS BYE\n")
-                    raise ConnectionAbortedError()
+                    return
 
                 else:
                     safe_send(conn, "ERR Unknown command. Use LIST | ALL | DM | QUIT\n")
 
-    except Exception:
-        pass
+    except OSError as exc:
+        logger.info("Connection %s closed: %s", addr, exc)
     finally:
         if username is not None:
-            cleanup_user(username)
+            cleanup_user(username, conn)
         else:
             try:
                 conn.close()
-            except:
+            except OSError:
                 pass
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--host", default=HOST, help="Bind address (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port", type=int, default=PORT, help="Listen port (default: 50000)"
+    )
+    args = parser.parse_args()
+    if not 1 <= args.port <= 65535:
+        parser.error("--port must be between 1 and 65535")
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind((HOST, PORT))
+    server_socket.bind((args.host, args.port))
     server_socket.listen(10)
 
     print("======================================")
-    print(f" SERVER RUNNING ON {HOST}:{PORT}")
+    print(f" SERVER RUNNING ON {args.host}:{args.port}")
     print("======================================")
 
-    while True:
-        conn, addr = server_socket.accept()
-        t = threading.Thread(target=handle_client, args=(conn, addr), daemon=True)
-        t.start()
+    try:
+        while True:
+            conn, addr = server_socket.accept()
+            t = threading.Thread(target=handle_client, args=(conn, addr), daemon=True)
+            t.start()
+    except KeyboardInterrupt:
+        print("\nStopping server.")
+    finally:
+        server_socket.close()
 
 
 if __name__ == "__main__":

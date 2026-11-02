@@ -1,6 +1,6 @@
 # TCP Chat: Project Report
 
-Browser-readable transcription of the original Hebrew report. [Download the Word document](tcp-chat-project-report.docx).
+Hebrew project report with neutral example usernames. [Download the Word document](tcp-chat-project-report.docx).
 
 The report describes the original coursework session. For commands supported by the current checked-in client, see the [README](../README.md#client-commands).
 
@@ -34,33 +34,33 @@ The report describes the original coursework session. For commands supported by 
 
 <h2 dir="rtl">3. דוגמאות קלט ופלט</h2>
 
-<p dir="rtl">תרחיש לדוגמה: משתמש בשם shaked מתחבר, שולח הודעה לכולם, ואז שולח הודעה פרטית למשתמש omer.</p>
+<p dir="rtl">תרחיש לדוגמה: משתמש בשם Alice מתחבר, שולח הודעה לכולם, ואז שולח הודעה פרטית למשתמש Bob.</p>
 
 <p dir="rtl">קלט בלקוח (Client Input):</p>
 
-<p dir="rtl">הזנת שם משתמש: shaked</p>
+<p dir="rtl">הזנת שם משתמש: Alice</p>
 
 <p dir="rtl">שליחת הודעה לכולם: <code dir="ltr">/all Hello everyone</code></p>
 
-<p dir="rtl">שליחת הודעה פרטית: <code dir="ltr">dm omer are you ready?</code></p>
+<p dir="rtl">שליחת הודעה פרטית: <code dir="ltr">dm Bob are you ready?</code></p>
 
 <p dir="rtl">יציאה: /quit</p>
 
 <p dir="rtl">פלט בשרת (Server Log):</p>
 
 <pre dir="ltr"><code>[*] New physical connection from ('192.168.1.82', 64512)
-[LOGIN] User 'Shaked' connected
-[CHAT - GROUP] Shaked: Hello everyone
-[CHAT - PRIVATE] Shaked to omer: Are you ready?
-[LOGOUT] User 'Shaked' disconnected.</code></pre>
+[LOGIN] User 'Alice' connected
+[CHAT - GROUP] Alice: Hello everyone
+[CHAT - PRIVATE] Alice to Bob: Are you ready?
+[LOGOUT] User 'Alice' disconnected.</code></pre>
 
 <p dir="rtl">פלט במסך הלקוח (Client Output):</p>
 
 <pre dir="ltr"><code>Connected to server
 SYS WELCOME
-OK Logged in as Shaked
-MSG GROUP Nir: Hi Shaked!
-MSG DM Omer: Yes I am ready.</code></pre>
+OK Logged in as Alice
+MSG GROUP Charlie: Hi Alice!
+MSG DM Bob: Yes I am ready.</code></pre>
 
 <h2 dir="rtl">4. ניתוח תעבורה (Wireshark)</h2>
 
@@ -74,7 +74,7 @@ MSG DM Omer: Yes I am ready.</code></pre>
 
 <p dir="rtl">דגלים (Flags): שימוש בדגל PSH (Push) המעיד על העברת נתונים מיידית (הודעות הצ'אט) ללא המתנה ב-Buffer.</p>
 
-<p dir="rtl">שכבת היישום (Payload): צפייה בתוכן ההודעות הגולמי כפי שהוגדר בפרוטוקול הטקסטואלי שבנינו (למשל: <code dir="ltr">LOGIN Shaked\n</code> או <code dir="ltr">ALL Hello\n</code>).</p>
+<p dir="rtl">שכבת היישום (Payload): צפייה בתוכן ההודעות הגולמי כפי שהוגדר בפרוטוקול הטקסטואלי שבנינו (למשל: <code dir="ltr">LOGIN Alice\n</code> או <code dir="ltr">ALL Hello\n</code>).</p>
 
 <h2 dir="rtl">5. תיאור שימוש בבינה מלאכותית (AI)</h2>
 

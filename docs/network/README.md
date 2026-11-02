@@ -4,11 +4,11 @@ The traffic-data workbook contains TCP packet rows for the chat session. The tra
 
 Read the exported worksheet values below or open the CSV tables directly on GitHub. These are snapshots of the values saved in the original Excel files; workbook formatting and charts remain in the downloads.
 
-[Packet capture](server-traffic-capture.pcapng) · [TCP stream screenshot](../images/wireshark-tcp-stream.png)
+[Packet capture](server-traffic-capture.pcapng)
 
 ## Traffic Analysis — group661305-5_http_input
 
-[View all 11 rows as CSV](traffic-analysis-sheet-1.csv) · [Original workbook](traffic-analysis.xlsx)
+[View all 11 rows as CSV](traffic-analysis-sheet-1.csv) · [Excel workbook](traffic-analysis.xlsx)
 
 | msg_id | app_protocol | src_app | dst_app | message | timestamp |
 | --- | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Read the exported worksheet values below or open the CSV tables directly on GitH
 
 ## Traffic Data — traffic_data
 
-[View all 27 rows as CSV](traffic-data-sheet-1.csv) · [Original workbook](traffic-data.xlsx)
+[View all 27 rows as CSV](traffic-data-sheet-1.csv) · [Excel workbook](traffic-data.xlsx)
 
 | No. | Time | Source | Destination | Protocol | Length | Info |
 | --- | --- | --- | --- | --- | --- | --- |
